@@ -3,6 +3,8 @@ A mod for VotV designed to create a mod menu that allows users to see all loaded
 
 Heavily inspired by the [ModMenu](<https://modrinth.com/mod/modmenu>) mod from Minecraft and Minecraft's modding ecosystem.
 
+Contained within the Questwalker-ModMenu folder are the lua scripts that accompany this mod.
+
 > [!IMPORTANT]
 > **This mod is in heavy development and is not complete yet!**
 

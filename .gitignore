@@ -79,6 +79,6 @@ Config/*.*
 !Config/DefaultEditor.ini
 !Config/DefaultEngine.ini
 !Config/DefaultGame.ini
-Content/*
+Content/Maps
 !Content/Mods
 safetycheck.py

@@ -5,8 +5,22 @@ Heavily inspired by the [ModMenu](<https://modrinth.com/mod/modmenu>) mod from M
 
 Contained within the Questwalker-ModMenu folder are the lua scripts that accompany this mod.
 
-> [!IMPORTANT]
-> **This mod is in heavy development and is not complete yet!**
+<img src="https://raw.githubusercontent.com/Questwalker/ModMenu/refs/heads/main/Assets/modsTab.png" alt="Description" width="40%">
+<img src="https://raw.githubusercontent.com/Questwalker/ModMenu/refs/heads/main/Assets/configTab.png" alt="Description" width="40%">
+
+## Feature List:
+* Mod menu button available in the pause/main menu.
+* View all mods (currently only blueprint mods!) currently loaded in the menu's first tab.
+* View all config files in the menu's second tab.
+* Edit config files in-game using the second tab's config editor.
+
+The ConfigAPI library is also made alongside this project. It's a library that makes it easier for developers to read/write config files without having to roll all of the code themselves. See [here](https://github.com/Questwalker/modmenu#config-api) for more documentation on that.
+
+## Creating your mod manifest (Making your ModMenu entry)
+(This section is for developers)\
+In the folder where your ModActor is located, create a new blueprint (the parent class can be anything, I.E. the base object class) and name it "manifest".
+
+Open it up and create 4 string variables, named "name", "desc", "author", "version". Then one final Texture2D variable "icon". Hit the compile button on the blueprint, and then hit the "Class Defaults" button to open up the defaults pane, where you should see the variables you just created in the list. This is where you will fill in your mod's information. Set the `name`, `description`, `author`, and `version` to whatever you want, and set the `icon` too (make sure the texture2D that you use is packaged with your mod or it might cause some issues).
 
 ## Config API
 This project also additionally provides a library called the ConfigAPI (located [here](https://github.com/Questwalker/modmenu/raw/refs/heads/main/Content/Mods/ModMenu/ConfigAPI.uasset)). This is intended to be used so that mods can read and write to config files (`.cfg`, `.ini`, etc.). This is an additional tool and does not require ModMenu in any way to use.

@@ -41,10 +41,5 @@ RegisterCustomEvent("IdentifyModMenu", function(ParamContext)
 end)
 --------------------------
 
-
-
-
-
-
-
-
+-- LowEntryExtendedStandardLibrary = StaticFindObject("/Script/LowEntryExtendedStandardLibrary.Default__LowEntryExtendedStandardLibrary") -- global for getmods to use
+-- bpCodeLib

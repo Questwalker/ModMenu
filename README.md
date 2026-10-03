@@ -5,8 +5,7 @@ Heavily inspired by the [ModMenu](<https://modrinth.com/mod/modmenu>) mod from M
 
 Contained within the Questwalker-ModMenu folder are the lua scripts that accompany this mod.
 
-<img src="https://raw.githubusercontent.com/Questwalker/ModMenu/refs/heads/main/Assets/modsTab.png" alt="Description" width="40%">
-<img src="https://raw.githubusercontent.com/Questwalker/ModMenu/refs/heads/main/Assets/configTab.png" alt="Description" width="40%">
+<img src="https://raw.githubusercontent.com/Questwalker/ModMenu/refs/heads/main/Assets/modsTab.png" alt="Description" width="40%">&nbsp;<img src="https://raw.githubusercontent.com/Questwalker/ModMenu/refs/heads/main/Assets/configTab.png" alt="Description" width="40%">
 
 ## Feature List:
 * Mod menu button available in the pause/main menu.

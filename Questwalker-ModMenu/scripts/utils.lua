@@ -1,5 +1,6 @@
 -- UTILS.lua by Questwalker
 function format_table(t)
+    local include_typeprefix = false
     local builder = ""
     local function _print(str)
         str = str or ""
@@ -13,14 +14,15 @@ function format_table(t)
             print_r_cache[tostring(t)]=true
             if (type(t) == "table") then
                 for pos,val in pairs(t) do
+                    local typeprefix = include_typeprefix and "<"..type(val)..">" or ""
                     if (type(val) == "table") then
-                        _print(indent.."<"..type(val)..">".."["..pos.."] => "..tostring(t).." {")
+                        _print(indent..typeprefix.."["..pos.."] => "..tostring(t).." {")
                         sub_print_r(val, indent..string.rep(" ", string.len(pos)+8))
                         _print(indent..string.rep(" ", string.len(pos)+6).."}")
                     elseif (type(val) == "string") then
-                        _print(indent.."<"..type(val)..">".."["..pos..'] => "'..val..'"')
+                        _print(indent..typeprefix.."["..pos..'] => "'..val..'"')
                     else
-                        _print(indent.."<"..type(val)..">".."["..pos.."] => "..valtostring(val))
+                        _print(indent..typeprefix.."["..pos.."] => "..valtostring(val))
                     end
                 end
             else

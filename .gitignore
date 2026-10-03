@@ -82,3 +82,4 @@ Config/*.*
 Content/Maps
 !Content/Mods
 safetycheck.py
+Questwalker-ModMenu/gather.py

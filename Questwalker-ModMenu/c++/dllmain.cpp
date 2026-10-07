@@ -12,6 +12,7 @@
 #include <codecvt>
 #include <locale>
 #include <cstdlib>
+#include <string_view>
 #include <UE4SSProgram.hpp>
 #include <Mod/CppMod.hpp>
 #include <Mod/LuaMod.hpp>
@@ -21,32 +22,61 @@
 using namespace RC;
 using namespace RC::Unreal;
 
-namespace fs = std::filesystem;
-std::wstring_convert<std::codecvt_utf8<wchar_t>> converter;
+std::filesystem::path find_modfile_cpp(StringViewType m_mod_name, std::filesystem::path m_mod_path) {
+    // Code taken from CppMod.cpp which locates the path to the dll file
+    std::filesystem::path m_dlls_path = m_mod_path / STR("dlls");
 
-std::string wchar_to_string(const wchar_t* wide_str) {
-    if (!wide_str) return "";
-
-    // 1. Determine the required buffer size
-    size_t size_needed = std::wcstombs(nullptr, wide_str, 0);
-    if (size_needed == static_cast<size_t>(-1)) {
-        return ""; // Conversion failed due to invalid character
+    if (!std::filesystem::exists(m_dlls_path))
+    {
+        return std::filesystem::path{};
     }
 
-    // 2. Allocate string and convert
-    std::string result(size_needed, '\0');
-    std::wcstombs(&result[0], wide_str, size_needed);
+    auto dll_path = m_dlls_path / STR("main.dll");
+    if (!std::filesystem::exists(dll_path))
+    {
+        dll_path = m_dlls_path / fmt::format(STR("{}.dll"), m_mod_name);
 
-    return result;
+        if (!std::filesystem::exists(dll_path))
+        {
+            return std::filesystem::path{};
+        }
+    }
+
+    return dll_path;
 }
 
-const char* wchar_to_char(const wchar_t* wide_str) {
-    size_t buffer_size = (wcslen(wide_str) + 1);
-    char* narrow_buffer = new char[buffer_size];
-    std::wcstombs(narrow_buffer, wide_str, buffer_size);
-    const char* result = narrow_buffer;
-    delete[] narrow_buffer;
-    return result;
+std::filesystem::path find_modfile_lua(std::filesystem::path m_mod_path) {
+    // Code taken from LuaMod.cpp which locates the path to the lua file
+    // first half
+    std::filesystem::path scripts_path = m_mod_path / STR("Scripts");
+
+    if (!std::filesystem::exists(scripts_path))
+    {
+        std::filesystem::path alt_scripts_path = m_mod_path / STR("scripts");
+        if (std::filesystem::exists(alt_scripts_path))
+        {
+            scripts_path = alt_scripts_path;
+        }
+    }
+
+    std::filesystem::path m_scripts_path = scripts_path;
+
+    if (!std::filesystem::exists(m_scripts_path))
+    {
+        return std::filesystem::path{};
+    }
+
+    // second half
+    std::filesystem::path main_script_path = m_scripts_path / STR("main.lua");
+
+    if (std::filesystem::exists(main_script_path))
+    {
+        return main_script_path;
+    }
+    else
+    {
+        return std::filesystem::path{};
+    }
 }
 
 class ModMenu : public CppUserModBase
@@ -57,7 +87,7 @@ public:
     ModMenu() : CppUserModBase()
     {
         ModName = STR("ModMenu");
-        ModVersion = STR("1.1.0");
+        ModVersion = STR("1.2.0");
         ModDescription = STR("A mod menu and config editor for VotV");
         ModAuthors = STR("Questwalker");
     }
@@ -92,26 +122,40 @@ public:
             int tablenumber = 1;
             for (const auto& mod : program.m_mods)
             {
-                std::string mod_name = std::string(wchar_to_string(mod->get_name().data()));
                 //mod->get_id(); // an arbitrary number
                 //mod->get_name(); // the mod folder name (eg. "ConsoleCommandsMod" or "Author-ExampleMod")
                 //mod->get_path(); // filepath to the folder that contains the dlls folder because fuck you
-                bool mod_is_functional = mod->is_started(); // && mod->is_installed(); is_installed gets reset to false when mod hot-reloading
+                std::filesystem::path path_absolute_path = mod->get_path();
                 std::string mod_type = "unknown";
                 if (auto* cpp_mod = dynamic_cast<CppMod*>(mod.get()))
                 {
                     mod_type = "cpp";
+                    auto completefilepath = find_modfile_cpp(mod->get_name(), mod->get_path());
+                    if (!completefilepath.empty()) {
+                        path_absolute_path = completefilepath;
+                    }
                 }
                 else if (auto* lua_mod = dynamic_cast<LuaMod*>(mod.get()))
                 {
                     mod_type = "lua";
+                    auto completefilepath = find_modfile_lua(mod->get_path());
+                    if (!completefilepath.empty()) {
+                        path_absolute_path = completefilepath;
+                    }
                 }
+                std::string mod_name = to_utf8_string(mod->get_name());
+                std::string mod_path = path_absolute_path.string();
+                bool mod_is_functional = mod->is_started(); // && mod->is_installed(); is_installed gets reset to false when mod hot-reloading
+
+                // print stuff
+                //auto wpath = std::filesystem::path(path_absolute_path).wstring();
+                //Output::send<LogLevel::Normal>(STR("[ModMenuDll] mod {}, filepath: {}\n"), ensure_str(mod_name), wpath);
 
                 // generate mod table
                 maintable.add_key(tablenumber);
                 auto currentmoddata = lua.prepare_new_table();
-                currentmoddata.add_pair("ModName", wchar_to_char(mod->get_name().data()));
-                currentmoddata.add_pair("AbsoluteFilePath", mod->get_path().string().c_str());
+                currentmoddata.add_pair("ModName", mod_name.c_str());
+                currentmoddata.add_pair("AbsoluteFilePath", mod_path.c_str());
                 currentmoddata.add_pair("ModType", mod_type.c_str());
                 currentmoddata.add_pair("ModFunctioning", mod_is_functional);
                 currentmoddata.make_local();

@@ -1,4 +1,8 @@
 -- UTILS.lua by Questwalker
+function escape_string(val)
+    return val:gsub("\n", "\\n"):gsub("\r", "\\r"):gsub("\t", "\\t"):gsub("\f", "\\f"):gsub("\v", "\\v")
+end
+
 function format_table(t)
     local include_typeprefix = false
     local builder = ""
@@ -60,6 +64,7 @@ function valtostring(value)
         -- FName, FText, FString, FAnsiString, FUtf8String
         elseif (UValType == "FName" or UValType == "FText" or UValType == "FString" or UValType == "FAnsiString" or UValType == "FUtf8String") then
             return value:ToString()
+            -- return escape_string(value:ToString())
 
         -- TArray
         elseif (UValType == "TArray") then

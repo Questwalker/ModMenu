@@ -14,6 +14,8 @@ Mods = {}
 
 -- Contains mod names from Mods/BPModLoaderMod/load_order.txt and is used to determine the load order of BP mods.
 local ModOrderList = {}
+local AssetRegistryHelpers = nil
+local AssetRegistry = nil
 
 local DefaultModConfig = {}
 DefaultModConfig.AssetName = "ModActor_C"
@@ -86,6 +88,8 @@ for _, ModFile in pairs(Files) do
         Mods[ModNameNoExtension].AssetNameAsFName = DefaultModConfig.AssetNameAsFName
         Mods[ModNameNoExtension].AssetPath = string.format("/Game/Mods/%s/ModActor", ModNameNoExtension)
         Mods[ModNameNoExtension].AbsoluteFilePath = ModPath
+    -- else
+        -- pprint('Non .pak file', ModFile)
     end
 end
 
@@ -142,11 +146,45 @@ for ModName, ModInfo in pairs(Mods) do
 end
 -- OrderedMods is final result, which is used by main.lua
 
+-- A modified version of the ModActor loading function. Detects mods that will fail to load because the pak filename is different from the asset folder name
+function CheckIfModExists(ModInfo)
+    world = UEHelpers.GetWorld()
 
+    local AssetData = nil
+    AssetData = {
+        ["ObjectPath"] = UEHelpers.FindOrAddFName(string.format("%s.%s", ModInfo.AssetPath, ModInfo.AssetName)),
+    }
 
+    local FolderAssets = {}
+    AssetRegistry:GetAssetsByPath(FName(string.format("/Game/Mods/%s", ModInfo.Name)), FolderAssets, true, false)
+    pprint(FolderAssets)
+    if #FolderAssets == 0 then
+        pprint(string.format("[ModMenuLua] Assets for mod '%s' do not exist", ModInfo.Name))
+        return false
+    else
+        return true
+    end
+end
 
+local function CacheAssetRegistry()
+    if AssetRegistryHelpers and AssetRegistry then return end
 
+    AssetRegistryHelpers = StaticFindObject("/Script/AssetRegistry.Default__AssetRegistryHelpers")
+    if not AssetRegistryHelpers:IsValid() then pprint("[ModMenuLua] AssetRegistryHelpers is not valid\n") end
 
+    if AssetRegistryHelpers then
+        AssetRegistry = AssetRegistryHelpers:GetAssetRegistry()
+        if AssetRegistry:IsValid() then return end
+    end
+
+    AssetRegistry = StaticFindObject("/Script/AssetRegistry.Default__AssetRegistryImpl")
+    if AssetRegistry:IsValid() then return end
+
+    error("AssetRegistry is not valid\n")
+end
+ExecuteInGameThread(function()
+    CacheAssetRegistry()
+end)
 
 -- Attempts to get a mods manifest from the modinfo and returns a resulting struct to describe
 function collectModDataAndManifest(ModInfo)
@@ -156,6 +194,7 @@ function collectModDataAndManifest(ModInfo)
     local ModIcon = nil
     local ModAuthor = ""
     local ModVersion = ""
+    -- local ModHasAssets = CheckIfModExists(ModInfo)
 
     -- Get default class of the provided manifest if it exists
     -- pprint("[ModMenuLua] Fetching manifest for", ModInfo.Name)
@@ -163,7 +202,7 @@ function collectModDataAndManifest(ModInfo)
     LowEntryExtendedStandardLibrary:GetClassWithName(string.format("/Game/Mods/%s/manifest.manifest_C", ModInfo.Name), ManifestObject, nil) -- We need error handling on this, and a ifvalid too
     local ManifestCDefault = nil
     if ManifestObject.success and ManifestObject.Class_:IsValid() then
-        pprint("[ModMenuLua] Success in getting manifest for", ModInfo.Name)
+        -- pprint("[ModMenuLua] Success in getting manifest for", ModInfo.Name)
         -- The manifest is valid, so it exists. We start pulling info from it
         -- Verifications and fallbacks are done for all of the datatypes
         ManifestCDefault = ManifestObject.Class_:GetCDO()
@@ -193,7 +232,7 @@ function collectModDataAndManifest(ModInfo)
             ModVersion = ""
         end
     else
-        pprint("[ModMenuLua] Failure to get manifest for", ModInfo.Name)
+        -- pprint("[ModMenuLua] Failure to get manifest for", ModInfo.Name)
     end
 
     -- Verifications and fallbacks for a couple of the datatypes part 2

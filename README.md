@@ -3,13 +3,13 @@ A mod for VotV designed to create a mod menu that allows users to see all loaded
 
 Heavily inspired by the [ModMenu](<https://modrinth.com/mod/modmenu>) mod from Minecraft and Minecraft's modding ecosystem.
 
-Contained within the Questwalker-ModMenu folder are the lua scripts that accompany this mod.
+Contained within the `Questwalker-ModMenu` folder are the lua and c++ source code.
 
 <img src="https://raw.githubusercontent.com/Questwalker/ModMenu/refs/heads/main/Assets/modsTab.png" alt="Description" width="40%">&nbsp;<img src="https://raw.githubusercontent.com/Questwalker/ModMenu/refs/heads/main/Assets/configTab.png" alt="Description" width="40%">
 
 ## Feature List:
 * Mod menu button available in the pause/main menu.
-* View all mods (currently only blueprint mods!) currently loaded in the menu's first tab.
+* View all mods currently loaded in the menu's first tab.
 * View all config files in the menu's second tab.
 * Edit config files in-game using the second tab's config editor.
 
